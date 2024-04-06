@@ -42,10 +42,18 @@ const calculateMarionPart = (total: number) => {
   return +calculation.toFixed(2);
 };
 
+const calculateTricount = () => {
+  const shouldHavePaid = values.value.raphael / (values.value.raphael + values.value.marion) * values.value.totalTricount;
+  if (shouldHavePaid < values.value.paidByRaphael) return values.value.paidByRaphael - shouldHavePaid;
+  else if (shouldHavePaid > values.value.paidByRaphael) return -(shouldHavePaid - values.value.paidByRaphael);
+  else return 0;
+}
+
+
 const totalMarionPart = () => {
-  if (values.value.paidByRaphael > values.value.paidByMarion) return calculateMarionPart(calculateTotalRentAndCharges()) + (values.value.paidByRaphael - calculateRaphaelPart(values.value.totalTricount));
-  if (values.value.paidByRaphael < values.value.paidByMarion) return calculateMarionPart(calculateTotalRentAndCharges()) - (values.value.paidByMarion - calculateMarionPart(values.value.totalTricount));
-  else return calculateMarionPart(calculateTotalRentAndCharges());
+  const tricountValue = calculateTricount();
+  const marionPart = calculateMarionPart(calculateTotalRentAndCharges())
+  return marionPart + tricountValue;
 };
 
 const selectAll = (event: Event) => {
