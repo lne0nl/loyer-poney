@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import poney from "@/assets/poney.png";
 
 const values = ref(
@@ -17,45 +17,38 @@ const values = ref(
 );
 
 /**
- * Calculate the total rent and charges.
- *
- * @return {number} the total rent and charges calculated to two decimal places
+ * Total rent and charges, rounded to two decimal places.
  */
-const calculateTotalRentAndCharges = (): number => {
-  const calculation = values.value.rent + values.value.internet + values.value.insurance;
+const totalRentAndCharges = computed((): number => {
+  const calculation = values.value.rent + values.value.electricity + values.value.internet + values.value.insurance;
   return +calculation.toFixed(2);
-};
+});
 
 /**
- * Calculate the Raphael part based on the total.
- *
- * @param {number} total - the total value
- * @return {number} the calculated Raphael part
+ * Raphael part of the total, proportional to his salary.
  */
-const calculateRaphaelPart = (total: number): number => {
-  const calculation = values.value.raphael / (values.value.raphael + values.value.marion) * total;
+const raphaelPart = computed((): number => {
+  const calculation = values.value.raphael / (values.value.raphael + values.value.marion) * totalRentAndCharges.value;
   return +calculation.toFixed(2);
-};
+});
 
-const calculateMarionPart = (total: number) => {
-  const calculation = (values.value.marion + values.value.electricity) / (values.value.raphael + (values.value.marion + values.value.electricity)) * total;
+/**
+ * Marion part of the total, proportional to her salary.
+ */
+const marionPart = computed((): number => {
+  const calculation = values.value.marion / (values.value.raphael + values.value.marion) * totalRentAndCharges.value;
   return +calculation.toFixed(2);
-};
+});
 
-const calculateTricount = () => {
+const tricount = computed((): number => {
   const shouldHavePaid = values.value.raphael / (values.value.raphael + values.value.marion) * values.value.totalTricount;
   if (shouldHavePaid < values.value.paidByRaphael) return values.value.paidByRaphael - shouldHavePaid;
   else if (shouldHavePaid > values.value.paidByRaphael) return -(shouldHavePaid - values.value.paidByRaphael);
   else return 0;
-}
+});
 
-
-const totalMarionPart = () => {
-  const tricountValue = calculateTricount();
-  const marionPart = calculateMarionPart(calculateTotalRentAndCharges())
-  console.log('marionPart => ', marionPart)
-  return marionPart + tricountValue;
-};
+// Marion pays the internet bill directly, so it's deducted from what she owes.
+const totalMarionPart = computed((): number => +(marionPart.value + tricount.value - values.value.internet).toFixed(2));
 
 const selectAll = (event: Event) => {
   const { target } = event;
@@ -118,7 +111,7 @@ const selectAll = (event: Event) => {
       <div class="section">
         <div class="label">Total</div>
 
-        <div class="input total">{{ calculateTotalRentAndCharges() }}€</div>
+        <div class="input total">{{ totalRentAndCharges }}€</div>
       </div>
     </div>
 
@@ -148,8 +141,8 @@ const selectAll = (event: Event) => {
           Part de Marion
         </div>
 
-        <div class="input" v-if="!isNaN(calculateMarionPart(calculateTotalRentAndCharges()))">
-          {{ calculateMarionPart(calculateTotalRentAndCharges()) }}€
+        <div class="input" v-if="!isNaN(marionPart)">
+          {{ marionPart }}€
         </div>
       </div>
 
@@ -158,8 +151,8 @@ const selectAll = (event: Event) => {
           Part de Raphaël
         </div>
 
-        <div class="input" v-if="!isNaN(calculateRaphaelPart(calculateTotalRentAndCharges()))">
-          {{ calculateRaphaelPart(calculateTotalRentAndCharges()) }}€
+        <div class="input" v-if="!isNaN(raphaelPart)">
+          {{ raphaelPart }}€
         </div>
       </div>
     </div>
@@ -197,8 +190,8 @@ const selectAll = (event: Event) => {
     </div>
 
     <div class="total-total"
-      v-if="!isNaN(+totalMarionPart().toFixed(2)) && values.rent && values.insurance && values.electricity && values.internet && values.marion && values.raphael && values.totalTricount && values.paidByMarion && values.paidByRaphael">
-      Marion doit {{ +totalMarionPart().toFixed(2) }}€
+      v-if="!isNaN(totalMarionPart) && values.rent && values.insurance && values.electricity && values.internet && values.marion && values.raphael && values.totalTricount && values.paidByMarion && values.paidByRaphael">
+      Marion doit {{ totalMarionPart }}€
     </div>
   </main>
 </template>
