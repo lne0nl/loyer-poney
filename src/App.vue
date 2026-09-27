@@ -7,7 +7,7 @@ const values = ref(
     rent: 1100,
     insurance: 16.44,
     electricity: 168,
-    internet: 31.69,
+    internet: 38,
     marion: 0,
     raphael: 0,
     totalTricount: 0,
@@ -22,7 +22,7 @@ const values = ref(
  * @return {number} the total rent and charges calculated to two decimal places
  */
 const calculateTotalRentAndCharges = (): number => {
-  const calculation = values.value.rent + values.value.electricity + values.value.internet + values.value.insurance;
+  const calculation = values.value.rent + values.value.internet + values.value.insurance;
   return +calculation.toFixed(2);
 };
 
@@ -38,7 +38,7 @@ const calculateRaphaelPart = (total: number): number => {
 };
 
 const calculateMarionPart = (total: number) => {
-  const calculation = values.value.marion / (values.value.raphael + values.value.marion) * total;
+  const calculation = (values.value.marion + values.value.electricity) / (values.value.raphael + (values.value.marion + values.value.electricity)) * total;
   return +calculation.toFixed(2);
 };
 
@@ -53,6 +53,7 @@ const calculateTricount = () => {
 const totalMarionPart = () => {
   const tricountValue = calculateTricount();
   const marionPart = calculateMarionPart(calculateTotalRentAndCharges())
+  console.log('marionPart => ', marionPart)
   return marionPart + tricountValue;
 };
 
