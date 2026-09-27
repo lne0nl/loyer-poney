@@ -4,7 +4,7 @@ import poney from "@/assets/poney.png";
 
 const values = ref(
   {
-    rent: 1100,
+    rent: 921,
     insurance: 16.44,
     electricity: 168,
     internet: 38,
